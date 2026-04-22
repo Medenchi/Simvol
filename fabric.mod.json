@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "simvol",
+  "version": "${version}",
+  "name": "Символ",
+  "description": "Сюжетный мод для карты Символ, я тут был ха",
+  "authors": ["Denchy"],
+  "contact": {},
+  "license": "ARR",
+  "icon": "assets/simvol/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.simvol.mod.Simvol"],
+    "client": ["com.simvol.mod.SimvolClient"],
+    "fabric-datagen": ["com.simvol.mod.data.SimvolDatagen"]
+  },
+  "mixins": ["simvol.mixins.json"],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version_range}",
+    "java": ">=17",
+    "geckolib": "*"
+  },
+  "suggests": {
+    "cloth-config2": "*"
+  }
+}
