@@ -3,51 +3,40 @@ package com.simvol.mod.dialogue.act;
 import com.simvol.mod.Simvol;
 import com.simvol.mod.dialogue.DialogueChoice;
 import com.simvol.mod.dialogue.DialogueNode;
+import com.simvol.mod.diary.EvidenceRegistry;
 import com.simvol.mod.story.StoryFlag;
 
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
-/**
- * ВСЕ ДИАЛОГИ НУЛЕВОГО АКТА — «УВОЛЬНЕНИЕ»
- * ===========================================
- * Каждый диалог — дерево DialogueNode.
- * Регистрируются в DialogueEngine при старте.
- */
 public class Act0Dialogues {
 
-    /**
-     * Возвращает все диалоги акта для регистрации.
-     */
     public static Map<String, DialogueNode> buildAll() {
         Map<String, DialogueNode> map = new LinkedHashMap<>();
 
-        map.put("act0_detective_thoughts_1",  buildDetectiveThoughts1());
-        map.put("act0_detective_reads_folder", buildDetectiveReadsFolder());
-        map.put("act0_detective_slams",        buildDetectiveSlams());
-        map.put("act0_boss_fires",             buildBossFires());
-        map.put("act0_badge_moment",           buildBadgeMoment());
-        map.put("act0_notice_board",           buildNoticeBoard());
-        map.put("act0_valeria_intro",          buildValeriaIntro());
-        map.put("act0_laptop_search",          buildLaptopSearch());
-        map.put("act0_detective_rage",         buildDetectiveRage());
+        map.put("act0_detective_thoughts_1",     buildDetectiveThoughts1());
+        map.put("act0_detective_reads_folder",    buildDetectiveReadsFolder());
+        map.put("act0_detective_slams",           buildDetectiveSlams());
+        map.put("act0_boss_fires",                buildBossFires());
+        map.put("act0_badge_moment",              buildBadgeMoment());
+        map.put("act0_notice_board",              buildNoticeBoard());
+        map.put("act0_valeria_intro",             buildValeriaIntro());
+        map.put("act0_laptop_search",             buildLaptopSearch());
+        map.put("act0_laptop_no_results",         buildLaptopNoResults());
+        map.put("act0_detective_rage",            buildDetectiveRage());
         map.put("act0_detective_parents_thought", buildParentsThought());
-        map.put("act0_intercom_mama_who",      buildIntercomScene());
-        map.put("act0_mama_greets",            buildMamaGreets());
-        map.put("act0_parents_main",           buildParentsMain());
-        map.put("act0_final_decision",         buildFinalDecision());
+        map.put("act0_intercom_mama_who",         buildIntercomScene());
+        map.put("act0_mama_greets",               buildMamaGreets());
+        map.put("act0_parents_main",              buildParentsMain());
+        map.put("act0_final_decision",            buildFinalDecision());
 
         return map;
     }
 
     // =========================================================
-    //  ВНУТРЕННИЕ МОНОЛОГИ ДЕТЕКТИВА
+    //  ВНУТРЕННИЕ МОНОЛОГИ
     // =========================================================
 
-    /**
-     * Детектив идёт по офису — внутренние мысли.
-     * Без выборов, авто-прокрутка.
-     */
     private static DialogueNode buildDetectiveThoughts1() {
         return DialogueNode.detective(
             "Третья ночь без сна. Седьмое дело за месяц. " +
@@ -59,21 +48,21 @@ public class Act0Dialogues {
         .build();
     }
 
-    /**
-     * Детектив читает название папки вслух.
-     */
     private static DialogueNode buildDetectiveReadsFolder() {
         return DialogueNode.detective(
             "Стеклянный Собиратель… Опять эта хуйня."
         )
         .voice("act0_detective_reads_folder")
         .autoAdvance(60)
+        // Улика: папка с делом
+        .onEnter(() -> {
+            if (Simvol.DIARY != null) {
+                Simvol.DIARY.addEvidence(EvidenceRegistry.CASE_FOLDER);
+            }
+        })
         .build();
     }
 
-    /**
-     * Детектив бросает папку начальнику.
-     */
     private static DialogueNode buildDetectiveSlams() {
         return DialogueNode.detective(
             "Я не буду это вести. " +
@@ -85,12 +74,11 @@ public class Act0Dialogues {
     }
 
     // =========================================================
-    //  НАЧАЛЬНИК — УВОЛЬНЕНИЕ
+    //  НАЧАЛЬНИК
     // =========================================================
 
     private static DialogueNode buildBossFires() {
 
-        // Финальная реплика начальника — конец диалога
         DialogueNode end = DialogueNode.builder("Начальник",
             "Убирайся из моего агентства."
         )
@@ -99,17 +87,16 @@ public class Act0Dialogues {
         .onEnter(() -> Simvol.STORY.setFlag(StoryFlag.ACT0_FIRED))
         .build();
 
-        // Третья реплика
         DialogueNode third = DialogueNode.builder("Начальник",
-            "Твои срывы, паранойя и отказы от нормальных дел " +
-            "достали всех. Собирай вещи."
+            "Твои срывы, паранойя и отказы " +
+            "от нормальных дел достали всех. " +
+            "Собирай вещи."
         )
         .voice("act0_boss_third")
         .autoAdvance(100)
         .next(end)
         .build();
 
-        // Вторая реплика — встаёт
         DialogueNode second = DialogueNode.builder("Начальник",
             "Ты уже полгода только мешаешь."
         )
@@ -118,7 +105,6 @@ public class Act0Dialogues {
         .next(third)
         .build();
 
-        // Первая реплика — главная
         return DialogueNode.builder("Начальник",
             "Ты уволен."
         )
@@ -129,7 +115,7 @@ public class Act0Dialogues {
     }
 
     // =========================================================
-    //  СБОРЫ — ЗНАЧОК
+    //  ЗНАЧОК
     // =========================================================
 
     private static DialogueNode buildBadgeMoment() {
@@ -143,7 +129,7 @@ public class Act0Dialogues {
     }
 
     // =========================================================
-    //  ОБЪЯВЛЕНИЕ НА СТЕНЕ
+    //  ОБЪЯВЛЕНИЕ
     // =========================================================
 
     private static DialogueNode buildNoticeBoard() {
@@ -155,6 +141,12 @@ public class Act0Dialogues {
         )
         .voice("act0_notice_2")
         .autoAdvance(100)
+        // Улика: объявление Ночного Дозора
+        .onEnter(() -> {
+            if (Simvol.DIARY != null) {
+                Simvol.DIARY.addEvidence(EvidenceRegistry.NIGHT_WATCH_AD);
+            }
+        })
         .build();
 
         return DialogueNode.detective(
@@ -168,12 +160,11 @@ public class Act0Dialogues {
     }
 
     // =========================================================
-    //  ВАЛЕРИЯ — НОЧНОЙ ДОЗОР
+    //  ВАЛЕРИЯ
     // =========================================================
 
     private static DialogueNode buildValeriaIntro() {
 
-        // Финал — независимо от выбора
         DialogueNode finale = DialogueNode.builder("Валерия",
             "Хорошо. Тогда не будем терять времени. " +
             "Дело называется «Стекло»."
@@ -183,7 +174,6 @@ public class Act0Dialogues {
         .onEnter(() -> Simvol.STORY.setFlag(StoryFlag.ACT0_JOINED_NIGHT_WATCH))
         .build();
 
-        // Ответы на каждый выбор
         DialogueNode answerDeal = DialogueNode.builder("Валерия",
             "Старый завод. Закрытый. " +
             "Там что-то происходит. Нужно выяснить что."
@@ -211,18 +201,15 @@ public class Act0Dialogues {
         .next(finale)
         .build();
 
-        DialogueNode answerSilent = DialogueNode.detective(
-            "..."
-        )
+        DialogueNode answerSilent = DialogueNode.detective("...")
         .autoAdvance(40)
         .next(finale)
         .build();
 
-        // Главная реплика с выборами
         DialogueNode second = DialogueNode.builder("Валерия",
             "Нам всё равно кого брать. " +
             "Дело тяжёлое. Никто не хочет браться. " +
-            "Справляешься — остаёшься. Вопросы есть?"
+            "Вопросы есть?"
         )
         .voice("act0_valeria_second")
         .choices(
@@ -237,10 +224,9 @@ public class Act0Dialogues {
         )
         .build();
 
-        // Первая реплика
         return DialogueNode.builder("Валерия",
-            "Значит ты и есть тот самый «лучший детектив Аргуса», " +
-            "которого все выгнали?"
+            "Значит ты и есть тот самый " +
+            "«лучший детектив Аргуса», которого все выгнали?"
         )
         .voice("act0_valeria_first")
         .autoAdvance(100)
@@ -249,16 +235,39 @@ public class Act0Dialogues {
     }
 
     // =========================================================
-    //  НОУТБУК — ПОИСК
+    //  НОУТБУК
     // =========================================================
 
     private static DialogueNode buildLaptopSearch() {
         return DialogueNode.detective(
-            "Стеклофабрика красново..."
+            "Стеклофабрика Красново..."
         )
         .voice("act0_laptop_search")
         .autoAdvance(80)
         .onEnter(() -> Simvol.STORY.setFlag(StoryFlag.ACT0_SEARCHED_INTERNET))
+        .build();
+    }
+
+    /**
+     * Отдельный узел — результат «не найдено».
+     * Добавляет улику поиска.
+     */
+    private static DialogueNode buildLaptopNoResults() {
+        return DialogueNode.detective(
+            "Результатов не найдено. " +
+            "Ни одного упоминания. " +
+            "Как будто этого места не существует."
+        )
+        .voice("act0_laptop_no_results")
+        .autoAdvance(100)
+        // Улика: поиск без результатов
+        .onEnter(() -> {
+            if (Simvol.DIARY != null) {
+                Simvol.DIARY.addEvidence(EvidenceRegistry.SEARCH_NO_RESULTS);
+            }
+            Simvol.PARANOIA.add(1,
+                com.simvol.mod.paranoia.ParanoiaSystem.Source.READ_DIARY);
+        })
         .build();
     }
 
@@ -328,44 +337,55 @@ public class Act0Dialogues {
 
     private static DialogueNode buildParentsMain() {
 
-        // ── Ветка про завод ───────────────────────────────────
+        // ── Ветка: отец говорит ───────────────────────────────
 
         DialogueNode fatherSpeaks = DialogueNode.builder("Отец",
             "Не надо тебе туда ходить."
         )
         .voice("act0_father_warning")
-        .autoAdvance(120)
+        .autoAdvance(140)
+        // Улика: предупреждение отца
         .onEnter(() -> {
-            // Только если спросили про завод
-            if (Simvol.STORY.hasFlag(StoryFlag.ACT0_ASKED_FATHER_DIRECTLY)) {
-                Simvol.STORY.setFlag(StoryFlag.ACT0_LEARN_FATHER_WORKED);
+            Simvol.STORY.setFlag(StoryFlag.ACT0_LEARN_FATHER_WORKED);
+            if (Simvol.DIARY != null) {
+                Simvol.DIARY.addEvidence(EvidenceRegistry.FATHER_WARNING);
             }
         })
         .build();
 
+        // ── Ветка: мама шепчет (после ухода отца) ────────────
+
         DialogueNode mamaWhisper = DialogueNode.builder("Мама",
             "Лучше не спрашивай его об этом… " +
             "После того года он сильно изменился. " +
-            "Стал… другим. Пожалуйста, не лезь туда, сынок."
+            "Стал… другим. " +
+            "Пожалуйста, не лезь туда, сынок."
         )
         .voice("act0_mama_whisper")
-        .autoAdvance(160)
+        .autoAdvance(180)
         .onEnter(() -> Simvol.STORY.setFlag(StoryFlag.ACT0_MOTHER_WARNED))
         .build();
 
+        // ── Ветка: мама про завод ─────────────────────────────
+
         DialogueNode mamaAboutFactory = DialogueNode.builder("Мама",
             "Завод закрылся в 1979 году… " +
-            "Мне тогда было 18. Твой отец там работал."
+            "Мне тогда было 18. " +
+            "Твой отец там работал."
         )
         .voice("act0_mama_factory")
         .autoAdvance(120)
-        .onEnter(() -> Simvol.STORY.setFlag(StoryFlag.ACT0_LEARNED_FATHER_WORKED))
+        // Улика: слова мамы
+        .onEnter(() -> {
+            Simvol.STORY.setFlag(StoryFlag.ACT0_LEARNED_FATHER_WORKED);
+            if (Simvol.DIARY != null) {
+                Simvol.DIARY.addEvidence(EvidenceRegistry.MOTHER_TESTIMONY);
+            }
+        })
         .next(fatherSpeaks)
         .build();
 
-        // ── Ответы на выборы ──────────────────────────────────
-
-        DialogueNode answerFactory = mamaAboutFactory;
+        // ── Ветка: почему закрылся ────────────────────────────
 
         DialogueNode answerWhyClosed = DialogueNode.builder("Мама",
             "Не знаю, сынок. Никто особо не говорил. " +
@@ -376,14 +396,19 @@ public class Act0Dialogues {
         .next(mamaWhisper)
         .build();
 
-        DialogueNode answerFather = DialogueNode.detective(
+        // ── Ветка: спросить отца напрямую ────────────────────
+
+        DialogueNode detectiveAsksFather = DialogueNode.detective(
             "Пап, ты помнишь завод?"
         )
         .voice("act0_detective_ask_father")
         .autoAdvance(40)
-        .onEnter(() -> Simvol.STORY.setFlag(StoryFlag.ACT0_ASKED_FATHER_DIRECTLY))
+        .onEnter(() ->
+            Simvol.STORY.setFlag(StoryFlag.ACT0_ASKED_FATHER_DIRECTLY))
         .next(fatherSpeaks)
         .build();
+
+        // ── Ветка: работа ─────────────────────────────────────
 
         DialogueNode answerJob = DialogueNode.builder("Мама",
             "Ничего, найдёшь новое место. " +
@@ -401,24 +426,32 @@ public class Act0Dialogues {
         )
         .voice("act0_mama_main")
         .choices(
-            DialogueChoice.of("Расскажи про завод рядом с деревней.",
-                answerFactory,
-                () -> Simvol.STORY.setFlag(StoryFlag.ACT0_ASKED_ABOUT_FACTORY)),
+            // Всегда доступен
+            DialogueChoice.of(
+                "Расскажи про завод рядом с деревней.",
+                mamaAboutFactory,
+                () -> Simvol.STORY.setFlag(StoryFlag.ACT0_ASKED_ABOUT_FACTORY)
+            ),
 
+            // Доступен только после того как узнали про завод
             DialogueChoice.conditional(
                 "Почему он закрылся?",
                 answerWhyClosed,
                 () -> Simvol.STORY.hasFlag(StoryFlag.ACT0_LEARNED_FATHER_WORKED)
             ),
 
+            // Доступен только после того как узнали про завод
             DialogueChoice.conditional(
                 "Спросить отца напрямую.",
-                answerFather,
+                detectiveAsksFather,
                 () -> Simvol.STORY.hasFlag(StoryFlag.ACT0_LEARNED_FATHER_WORKED)
             ),
 
-            DialogueChoice.of("Потерял работу.",
-                answerJob)
+            // Всегда доступен
+            DialogueChoice.of(
+                "Потерял работу.",
+                answerJob
+            )
         )
         .build();
     }
@@ -433,7 +466,8 @@ public class Act0Dialogues {
         )
         .voice("act0_final_decision")
         .autoAdvance(80)
-        .onEnter(() -> Simvol.STORY.setFlag(StoryFlag.ACT0_DECIDED_TO_GO))
+        .onEnter(() ->
+            Simvol.STORY.setFlag(StoryFlag.ACT0_DECIDED_TO_GO))
         .build();
     }
 }
